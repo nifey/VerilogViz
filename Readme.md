@@ -28,6 +28,7 @@ Python deps: pyverilog, customtkinter
       - [ ] Half adder
       - [ ] Full adder
       - [ ] Something with all verilog supported basic gates
+      - [ ] Flip Flop (which should have a wire that goes backwards in level order)
   - Simple sequential circuits
       - [ ] Ripple counter
 - [X] Basic GUI and command line parsing

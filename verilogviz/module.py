@@ -1,29 +1,7 @@
 from pyverilog.vparser.ast import *
 from verilogviz.instancebox import InstanceBox
+from verilogviz.utils import *
 import customtkinter
-
-def find_root_module_ast(currentAst, rootModuleName):
-    """ Traverses the AST tree and returns the ModuleDef node with the given module name"""
-    if isinstance(currentAst, Source) or isinstance(currentAst, Description):
-        for child in currentAst.children():
-            returnVal = find_root_module_ast(child, rootModuleName)
-            if returnVal != None:
-                return returnVal
-    elif isinstance(currentAst, ModuleDef):
-        return currentAst
-    return None
-
-def get_n_equidistant_values_between(start, end, n):
-    """ Returns n equidistant values between start and end values
-    """
-    line_length = end - start
-    shift = line_length/(n + 1)
-    current = start + shift
-    return_coords = []
-    for i in range(n):
-        return_coords.append(current)
-        current = current + shift
-    return return_coords
 
 class Module():
     def __init__(self, ast_node):
@@ -46,12 +24,15 @@ class Module():
             assert isinstance(port, Ioport)
             assert len(port.children()) == 1
             port = port.children()[0]
+            portname = port.name
             if isinstance(port, Input):
-                self.input_ports.append(port.name)
-                self.wires.append(port.name)
+                self.input_ports.append(portname)
+                self.wires.append(portname)
+                self.wire_ins[portname] = (self, portname)
             elif isinstance(port, Output):
-                self.output_ports.append(port.name)
-                self.wires.append(port.name)
+                self.output_ports.append(portname)
+                self.wires.append(portname)
+                self.wire_outs[portname] = [(self, portname)]
             else: assert False
 
         # Read wires and instances
@@ -91,11 +72,11 @@ class Module():
                     if current_instance not in instance_level_value.keys():
                         instance_level_value[current_instance] = current_level
                     for _, wire in current_instance.input_ports:
-                        if wire not in self.wire_ins.keys():
-                            continue
-                        prev_instance = self.wire_ins[wire]
+                        prev_instance_tuple  = self.wire_ins[wire]
+                        prev_instance, _ = prev_instance_tuple
+                        if prev_instance == self: continue
                         if prev_instance not in visited_instances:
-                            next_instances.append(prev_instance)
+                            next_instances.append(prev_instance_tuple)
                 current_level = current_level + 1
                 visited_instances = visited_instances.union(set(current_instances))
                 current_instances = next_instances
@@ -171,3 +152,26 @@ class Module():
 
         for instance in self.instances:
             instance.render(canvas)
+
+        for wire in self.wires:
+            in_instance, in_port = self.wire_ins[wire]
+            in_x, in_y = in_instance.get_port_coords(in_port)
+            for out_instance, out_port in self.wire_outs[wire]:
+                out_x, out_y = out_instance.get_port_coords(out_port)
+                canvas.create_line(in_x, in_y, out_x, out_y)
+
+    def get_port_coords(self, required_port):
+        if required_port in self.input_ports:
+            pos_x = self.canvas_width/2 - self.module_width/2
+            port_index = self.input_ports.index(required_port)
+            pos_y = get_n_equidistant_values_between(self.canvas_height/2 - self.module_height/2,
+                                                     self.canvas_height/2 + self.module_height/2,
+                                                     len(self.input_ports))[port_index]
+            return (pos_x, pos_y)
+        if required_port in self.output_ports:
+            pos_x = self.canvas_width/2 + self.module_width/2
+            port_index = self.output_ports.index(required_port)
+            pos_y = get_n_equidistant_values_between(self.canvas_height/2 - self.module_height/2,
+                                                     self.canvas_height/2 + self.module_height/2,
+                                                     len(self.output_ports))[port_index]
+            return (pos_x, pos_y)
