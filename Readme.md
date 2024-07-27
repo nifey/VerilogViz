@@ -4,12 +4,17 @@ A tool to visualize circuits written in Verilog. Built on top of [pyverilog](htt
 
 ## What works now
 - Can render the main module (from the filename) as a rectangle and show the input and output ports
+- Can render some basic primitive gates
+
+![Gates](tests/mux.png)
 
 ## Assumptions
 To make it easier to start with, we have made some assumptions about the verilog code:
 - Only Gate level abstraction is used. Behavioural and Dataflow modelling not yet supported.
 - No parameter support
 - No inout ports
+- No vectors or arrays
+- bufif1, bufif0, notif1, notif0 not yet supported
 
 ## Dependecies
 Dependencies: iverilog
@@ -18,21 +23,21 @@ Python deps: pyverilog, customtkinter
 ## TODO
 - Write verilog circuits to perform the diagram generation on
   - Simple combinational circuits
-      - [ ] Mux
+      - [X] Mux
       - [ ] Half adder
       - [ ] Full adder
       - [ ] Something with all verilog supported basic gates
   - Simple sequential circuits
       - [ ] Ripple counter
-- [ ] Basic GUI and command line parsing
-- [ ] Use pyverilog to parse verilog code
+- [X] Basic GUI and command line parsing
+- [X] Use pyverilog to parse verilog code
 - [ ] Create internal datastructures of nodes and edges
-  - [ ] Modules (input pins, output pins)
+  - [ ] Modules (input pins, output pins, instances)
   - [ ] Wires
 - [ ] Layout the nodes in a neat way using place and route
-  - [ ] Start with a box for the module
-  - [ ] Place equidistant input ports on the left side
-  - [ ] Place equidistant output ports on the right side
+  - [X] Start with a box for the module
+  - [X] Place equidistant input ports on the left side
+  - [X] Place equidistant output ports on the right side
   - [ ] Start from the output ports and move backwards building a tree, that will give you the layer number
 
 ## Future

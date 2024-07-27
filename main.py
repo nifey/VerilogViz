@@ -17,7 +17,7 @@ ast, _ = parse([filename])
 # Find the root module name and ast
 basefilename = os.path.basename(filename)
 rootModuleName = basefilename[:basefilename.find(".")]
-rootmodule = findRootModuleAst(ast, rootModuleName)
+rootmodule = find_root_module_ast(ast, rootModuleName)
 mod = Module(rootmodule)
 
 # Create window and display module
