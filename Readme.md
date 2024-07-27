@@ -5,6 +5,7 @@ A tool to visualize circuits written in Verilog. Built on top of [pyverilog](htt
 ## What works now
 - Can render the main module (from the filename) as a rectangle and show the input and output ports
 - Can render some basic primitive gates
+- Arrange the instances and primitive gates in a level order
 
 ![Gates](tests/mux.png)
 
@@ -31,14 +32,16 @@ Python deps: pyverilog, customtkinter
       - [ ] Ripple counter
 - [X] Basic GUI and command line parsing
 - [X] Use pyverilog to parse verilog code
-- [ ] Create internal datastructures of nodes and edges
-  - [ ] Modules (input pins, output pins, instances)
-  - [ ] Wires
+- [X] Create internal datastructures of nodes and edges
+  - [X] Modules (input pins, output pins, instances)
+  - [X] Wires
 - [ ] Layout the nodes in a neat way using place and route
   - [X] Start with a box for the module
   - [X] Place equidistant input ports on the left side
   - [X] Place equidistant output ports on the right side
-  - [ ] Start from the output ports and move backwards building a tree, that will give you the layer number
+  - [X] Start from the output ports and move backwards building a tree, that will give you the layer number
+  - [ ] Place the wires in between the nodes in a good looking way
+  - [ ] Optimize the order of gates in each level to reduce the number of criss cross wires
 
 ## Future
 - Add editor capabilities: Turn this into a full blown IDE for Verilog learners
