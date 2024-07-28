@@ -6,6 +6,7 @@ A tool to visualize circuits written in Verilog. Built on top of [pyverilog](htt
 - Can render the main module (from the filename) as a rectangle and show the input and output ports
 - Can render some basic primitive gates
 - Arrange the instances and primitive gates in a level order
+- Connect ports with straight lines (which may cross over other gates)
 
 ![Gates](tests/mux.png)
 
@@ -19,16 +20,17 @@ To make it easier to start with, we have made some assumptions about the verilog
 
 ## Dependecies
 Dependencies: iverilog
-Python deps: pyverilog, customtkinter
+
+Python packages: pyverilog, customtkinter
 
 ## TODO
 - Write verilog circuits to perform the diagram generation on
   - Simple combinational circuits
       - [X] Mux
-      - [ ] Half adder
-      - [ ] Full adder
+      - [X] Half adder
+      - [X] Full adder
+      - [X] SR Latch
       - [ ] Something with all verilog supported basic gates
-      - [ ] Flip Flop (which should have a wire that goes backwards in level order)
   - Simple sequential circuits
       - [ ] Ripple counter
 - [X] Basic GUI and command line parsing
@@ -42,7 +44,10 @@ Python deps: pyverilog, customtkinter
   - [X] Place equidistant output ports on the right side
   - [X] Start from the output ports and move backwards building a tree, that will give you the layer number
   - [ ] Place the wires in between the nodes in a good looking way
+  - [ ] Create a basic editor like layout with code on left and diagram generated on right
+  - [ ] Add feature to render any module in the file not just the module with filename
   - [ ] Optimize the order of gates in each level to reduce the number of criss cross wires
+  - [ ] Use commutativity of primitive gates to reorder ports for better wire placement
 
 ## Future
 - Add editor capabilities: Turn this into a full blown IDE for Verilog learners
@@ -51,3 +56,6 @@ Python deps: pyverilog, customtkinter
 - Autogenerate testbench from input values
     - Add a way specify testcases in GUI and check for the expected output
 - Display GTKWave like diagram in GUI
+
+## Other similar projects
+- [DigitalJS](https://github.com/tilk/digitaljs_online) ([Demo link](http://digitaljs.tilk.eu/))
