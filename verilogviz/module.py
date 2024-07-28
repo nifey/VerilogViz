@@ -1,5 +1,6 @@
 from pyverilog.vparser.ast import *
 from verilogviz.instancebox import InstanceBox
+from verilogviz.layer import Layer
 from verilogviz.utils import *
 import customtkinter
 
@@ -13,6 +14,7 @@ class Module():
         self.wires = []
         self.wire_ins = {}  # Maps wire to source (instance, port_name)
         self.wire_outs = {} # Maps wire to outputs [(instance, port_name)]
+        self.layers = []
 
         self.canvas_width = 1000
         self.canvas_height = 1000
@@ -96,13 +98,13 @@ class Module():
             level_instance_value[level].append(instance)
 
         total_levels = len(level_instance_value.keys())
-        for level, x_pos in zip(reversed(sorted(level_instance_value.keys())),
-                                get_n_equidistant_values_between(self.start_x, self.end_x, total_levels)):
-            total_instances_in_level = len(level_instance_value[level])
-            for instance, y_pos in zip(level_instance_value[level],
-                                      get_n_equidistant_values_between(self.start_y, self.end_y,
-                                                                       total_instances_in_level)):
-                instance.set_coords(x_pos, y_pos)
+        for layer_id, (level, x_pos) in enumerate(zip(reversed(sorted(level_instance_value.keys())),
+                                                  get_n_equidistant_values_between(
+                                                      self.start_x,
+                                                      self.end_x,
+                                                      total_levels))):
+            self.layers.append(Layer(layer_id, x_pos, self.start_y, self.end_y,
+                                     level_instance_value[level]))
 
     def __str__(self):
         return self.name
@@ -147,8 +149,8 @@ class Module():
                                text=port)
             current_port_y = current_port_y + output_port_shift
 
-        for instance in self.instances:
-            instance.render(canvas)
+        for layers in self.layers:
+            layers.render(canvas)
 
         for wire in self.wires:
             in_instance, in_port = self.wire_ins[wire]

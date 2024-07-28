@@ -26,12 +26,19 @@ class InstanceBox:
     def is_primitive(self):
         return self.instance.module in ['and', 'nand', 'or', 'nor', 'not', 'buf', 'xor', 'xnor']
 
+    def set_layer(self, layer):
+        self.layer = layer
+
     def set_coords(self, x, y, width=100, height=100):
         """ Set the coordinates and dimensions of this instance"""
         self.width = width
         self.height = height
         self.center_x = x
         self.center_y = y
+        self.start_x = self.center_x - self.width/2
+        self.start_y = self.center_y - self.height/2
+        self.end_x = self.center_x + self.width/2
+        self.end_y = self.center_y + self.height/2
 
     def get_port_coords(self, required_port):
         port_index = 0
@@ -56,10 +63,10 @@ class InstanceBox:
 
     def render(self, canvas):
         """ Renders instance on the canvas centered at position (center_x, center_y)"""
-        start_x = self.center_x - self.width/2
-        start_y = self.center_y - self.height/2
-        end_x = self.center_x + self.width/2
-        end_y = self.center_y + self.height/2
+        start_x = self.start_x
+        start_y = self.start_y
+        end_x = self.end_x
+        end_y = self.end_y
         match self.instance.module:
             case 'and':     render_and_gate(canvas, start_x, start_y, end_x, end_y)
             case 'nand':    render_nand_gate(canvas, start_x, start_y, end_x, end_y)
