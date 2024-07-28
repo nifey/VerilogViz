@@ -68,9 +68,9 @@ class Module():
 
         # Assign a color for each wire, to be used when rendering the wires
         for wire in self.wires:
-            self.wirecolors[wire] = '#{:02x}{:02x}{:02x}'.format(random.randint(0,256),
-                                                           random.randint(0,256),
-                                                           random.randint(0,256))
+            self.wirecolors[wire] = '#{:02x}{:02x}{:02x}'.format(random.randint(0,255),
+                                                           random.randint(0,255),
+                                                           random.randint(0,255))
 
         # Assign a layer number for each instance
         # Start from the output ports and do a breadth first search
