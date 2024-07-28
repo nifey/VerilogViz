@@ -7,18 +7,33 @@ A tool to visualize circuits written in Verilog. Built on top of [pyverilog](htt
 ![Screenshot1](tests/screenshot1.png)
 ![Screenshot2](tests/screenshot2.png)
 
+## Installation and Usage
+- Install iverilog on your Linux system
+    ```sh
+    sudo apt-get install iverilog
+    ```
+- Install pyverilog and customtkinter python packages
+    ```sh
+    pip install pyverilog customtkinter --user
+    ```
+- Clone this repository
+    ```sh
+    git clone https://github.com/nifey/verilogviz
+    cd verilogviz
+    ```
+- Run main.py with a single verilog filename argument
+    ```sh
+    python main.py tests/mux.v
+    ```
+
 ## Assumptions
+
 To make it easier to start with, we have made some assumptions about the verilog code:
 - Only Gate level abstraction is used. Behavioural and Dataflow modelling not yet supported.
 - No parameter support
 - No inout ports
 - No vectors or arrays
 - bufif1, bufif0, notif1, notif0 not yet supported
-
-## Dependecies
-Dependencies: iverilog
-
-Python packages: pyverilog, customtkinter
 
 ## TODO
 - Write verilog circuits to perform the diagram generation on
