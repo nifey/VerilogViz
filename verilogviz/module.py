@@ -18,6 +18,10 @@ class Module():
         self.canvas_height = 1000
         self.module_width = 800
         self.module_height = 800
+        self.start_x = (self.canvas_width/2) - (self.module_width/2)
+        self.end_x = (self.canvas_width/2) + (self.module_width/2)
+        self.start_y = (self.canvas_height/2) - (self.module_height/2)
+        self.end_y = (self.canvas_height/2) + (self.module_height/2)
 
         # Fill port list and also add them to wires
         for port in ast_node.portlist.children():
@@ -92,15 +96,11 @@ class Module():
             level_instance_value[level].append(instance)
 
         total_levels = len(level_instance_value.keys())
-        start_x = (self.canvas_width/2) - (self.module_width/2)
-        end_x = (self.canvas_width/2) + (self.module_width/2)
-        start_y = (self.canvas_height/2) - (self.module_height/2)
-        end_y = (self.canvas_height/2) + (self.module_height/2)
         for level, x_pos in zip(reversed(sorted(level_instance_value.keys())),
-                                get_n_equidistant_values_between(start_x, end_x, total_levels)):
+                                get_n_equidistant_values_between(self.start_x, self.end_x, total_levels)):
             total_instances_in_level = len(level_instance_value[level])
             for instance, y_pos in zip(level_instance_value[level],
-                                      get_n_equidistant_values_between(start_y, end_y,
+                                      get_n_equidistant_values_between(self.start_y, self.end_y,
                                                                        total_instances_in_level)):
                 instance.set_coords(x_pos, y_pos)
 
@@ -108,16 +108,12 @@ class Module():
         return self.name
 
     def render(self, canvas):
-        module_start_x = (self.canvas_width/2) - (self.module_width/2)
-        module_end_x = (self.canvas_width/2) + (self.module_width/2)
-        module_start_y = (self.canvas_height/2) - (self.module_height/2)
-        module_end_y = (self.canvas_height/2) + (self.module_height/2)
-        canvas.create_rectangle(module_start_x, module_start_y, module_end_x, module_end_y)
+        canvas.create_rectangle(self.start_x, self.start_y, self.end_x, self.end_y)
 
         # Display root module name
         text_height = 20
-        canvas.create_text((module_start_x + module_end_x)/2,
-                           module_start_y - text_height, text = self.name)
+        canvas.create_text((self.start_x + self.end_x)/2,
+                           self.start_y - text_height, text = self.name)
 
         port_length = 10
         text_length = 20
@@ -126,13 +122,13 @@ class Module():
         # FIXME replace this with get_n_equidistant_values_between
         num_input_ports = len(self.input_ports)
         input_port_shift = self.module_height/(num_input_ports + 1)
-        current_port_y = module_start_y + input_port_shift
+        current_port_y = self.start_y + input_port_shift
         for port in self.input_ports:
-            canvas.create_rectangle(module_start_x - port_length,
+            canvas.create_rectangle(self.start_x - port_length,
                                     current_port_y - (port_length/2),
-                                    module_start_x,
+                                    self.start_x,
                                     current_port_y + (port_length/2))
-            canvas.create_text(module_start_x - port_length - text_length,
+            canvas.create_text(self.start_x - port_length - text_length,
                                current_port_y,
                                text=port)
             current_port_y = current_port_y + input_port_shift
@@ -140,13 +136,13 @@ class Module():
         # Place output ports equidistant from each other on right edge of module box
         num_output_ports = len(self.output_ports)
         output_port_shift = self.module_height/(num_output_ports + 1)
-        current_port_y = module_start_y + output_port_shift
+        current_port_y = self.start_y + output_port_shift
         for port in self.output_ports:
-            canvas.create_rectangle(module_end_x,
+            canvas.create_rectangle(self.end_x,
                                     current_port_y - (port_length/2),
-                                    module_end_x + port_length,
+                                    self.end_x + port_length,
                                     current_port_y + (port_length/2))
-            canvas.create_text(module_end_x + port_length + text_length,
+            canvas.create_text(self.end_x + port_length + text_length,
                                current_port_y,
                                text=port)
             current_port_y = current_port_y + output_port_shift
