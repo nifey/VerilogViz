@@ -33,6 +33,9 @@ class InstanceBox:
         """ Set the coordinates and dimensions of this instance"""
         self.width = width
         self.height = height
+        if self.instance.module in ['not', 'buf']:
+            self.width = 40
+            self.height = 30
         self.center_x = x
         self.center_y = y
         self.start_x = self.center_x - self.width/2
@@ -98,13 +101,13 @@ def render_nand_gate(canvas, start_x, start_y, end_x, end_y):
                        end_x + gate_bubble_width, (start_y + end_y)/2 + gate_bubble_width/2)
 
 def render_or_gate(canvas, start_x, start_y, end_x, end_y):
-    canvas.create_arc(start_x - gate_gap_width, end_y,
-                      start_x + gate_gap_width, start_y,
+    canvas.create_arc(start_x - 2 * gate_gap_width, end_y,
+                      start_x, start_y,
                       start=-90, extent=180, style='arc')
-    canvas.create_arc(start_x - (end_x - start_x), start_y,
+    canvas.create_arc(start_x - (2 * gate_gap_width + end_x - start_x), start_y,
                       end_x, end_y, start=0,
                       extent=90, style='arc')
-    canvas.create_arc(start_x - (end_x - start_x), start_y,
+    canvas.create_arc(start_x - (2 * gate_gap_width + end_x - start_x), start_y,
                       end_x, end_y,
                       start=-90, extent=90, style='arc')
 
@@ -116,8 +119,8 @@ def render_nor_gate(canvas, start_x, start_y, end_x, end_y):
 
 def render_xor_gate(canvas, start_x, start_y, end_x, end_y):
     start_x = start_x + gate_xor_gap_width
-    canvas.create_arc(start_x - gate_xor_gap_width - gate_gap_width, end_y,
-                      start_x - gate_xor_gap_width + gate_gap_width, start_y,
+    canvas.create_arc(start_x - gate_xor_gap_width - 2 * gate_gap_width, end_y,
+                      start_x - gate_xor_gap_width, start_y,
                       start=-90, extent=180, style='arc')
     render_or_gate(canvas, start_x, start_y, end_x, end_y)
 
@@ -131,31 +134,13 @@ def render_xnor_gate(canvas, start_x, start_y, end_x, end_y):
 def render_buf_gate(canvas, start_x, start_y, end_x, end_y):
     width = end_x - start_x
     height = end_y - start_y
-    old_start_x = start_x
-    start_x = start_x + width/2 - gate_buf_width/2
-    old_end_x = end_x
-    end_x = end_x - width/2 + gate_buf_width/2
-    start_y = start_y + height/2 - gate_buf_height/2
-    end_y = end_y - height/2 + gate_buf_height/2
     mid_y = (start_y + end_y)/2
-    canvas.create_line(old_start_x, mid_y, start_x, mid_y)
-    canvas.create_line(end_x, mid_y, old_end_x, mid_y)
     canvas.create_polygon((start_x, start_y), (end_x, mid_y), (start_x, end_y),
                           fill="", outline='black')
 
 def render_not_gate(canvas, start_x, start_y, end_x, end_y):
-    width = end_x - start_x
-    height = end_y - start_y
-    old_start_x = start_x
-    start_x = start_x + width/2 - gate_buf_width/2
-    old_end_x = end_x
-    end_x = end_x - width/2 + gate_buf_width/2
-    start_y = start_y + height/2 - gate_buf_height/2
-    end_y = end_y - height/2 + gate_buf_height/2
+    end_x = end_x - gate_bubble_width
     mid_y = (start_y + end_y)/2
-    canvas.create_line(old_start_x, mid_y, start_x, mid_y)
-    canvas.create_line(end_x + gate_bubble_width, mid_y, old_end_x, mid_y)
-    canvas.create_polygon((start_x, start_y), (end_x, mid_y), (start_x, end_y),
-                          fill="", outline='black')
+    render_buf_gate(canvas, start_x, start_y, end_x, end_y)
     canvas.create_oval(end_x, mid_y - gate_bubble_width/2,
                        end_x + gate_bubble_width, mid_y + gate_bubble_width/2)

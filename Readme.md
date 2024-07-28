@@ -43,9 +43,13 @@ Python packages: pyverilog, customtkinter
   - [X] Place equidistant input ports on the left side
   - [X] Place equidistant output ports on the right side
   - [X] Start from the output ports and move backwards building a tree, that will give you the layer number
-  - [ ] Place the wires in between the nodes in a good looking way
+  - [X] Place the wires in between the nodes in a good looking way
+  - [X] Render each wire in a different random color to make it easier to differentiate
   - [ ] Create a basic editor like layout with code on left and diagram generated on right
   - [ ] Add feature to render any module in the file not just the module with filename
+  - [ ] Handle back edge across layers (SR Latch)
+  - [ ] Overlapping horizontal lines in some cases. Also route the wires in more neater way
+  - [ ] Handle custom module instances (naming ports and instances)
   - [ ] Optimize the order of gates in each level to reduce the number of criss cross wires
   - [ ] Use commutativity of primitive gates to reorder ports for better wire placement
 

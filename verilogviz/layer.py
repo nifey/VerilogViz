@@ -5,6 +5,7 @@ class Layer:
 
     def __init__(self, layer_id, x_pos, y_range_start, y_range_end, instance_list):
         total_instances_in_level = len(instance_list)
+        self.layer_id = layer_id
         self.instances = []
         for instance, y_pos in zip(instance_list,
                                    get_n_equidistant_values_between(y_range_start, y_range_end,

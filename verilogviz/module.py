@@ -3,6 +3,7 @@ from verilogviz.instancebox import InstanceBox
 from verilogviz.layer import Layer
 from verilogviz.utils import *
 import customtkinter
+import random
 
 class Module():
     def __init__(self, ast_node):
@@ -12,6 +13,7 @@ class Module():
         self.output_ports = []
         self.instances = []
         self.wires = []
+        self.wirecolors = {}
         self.wire_ins = {}  # Maps wire to source (instance, port_name)
         self.wire_outs = {} # Maps wire to outputs [(instance, port_name)]
         self.layers = []
@@ -63,6 +65,12 @@ class Module():
                 # FIXME Handle cases when a wire has more than one input
                 assert wire not in self.wire_ins.keys() # Wire should have only on input
                 self.wire_ins[wire] = (instance, port)
+
+        # Assign a color for each wire, to be used when rendering the wires
+        for wire in self.wires:
+            self.wirecolors[wire] = '#{:02x}{:02x}{:02x}'.format(random.randint(0,256),
+                                                           random.randint(0,256),
+                                                           random.randint(0,256))
 
         # Assign a layer number for each instance
         # Start from the output ports and do a breadth first search
@@ -152,12 +160,133 @@ class Module():
         for layers in self.layers:
             layers.render(canvas)
 
-        for wire in self.wires:
-            in_instance, in_port = self.wire_ins[wire]
-            in_x, in_y = in_instance.get_port_coords(in_port)
-            for out_instance, out_port in self.wire_outs[wire]:
-                out_x, out_y = out_instance.get_port_coords(out_port)
-                canvas.create_line(in_x, in_y, out_x, out_y)
+        # Now place the wires
+        live_wires = []
+        live_wire_y = {}
+        for wire, ypos in zip(self.input_ports,
+                              get_n_equidistant_values_between(self.start_y,
+                                                               self.end_y,
+                                                               len(self.input_ports))):
+            live_wires.append(wire)
+            live_wire_y[wire] = ypos
+
+        # Set of all xchannels (horizontal line area outside all layers)
+        xchannels = {} # Maps wires to their reserved xchannels
+        xchannel_current = min (min(map(lambda x: x.start_y, self.layers)),
+                                min(live_wire_y.values())) - 30
+        xchannel_shift = 5
+
+        current_xpos = self.start_x
+        for current_layer in self.layers:
+            # Assign a vertical channel (xpos) to each live wire
+            next_xpos = current_layer.end_x + 20
+            live_wire_x = {}
+            for wire, x_pos in zip(live_wires, get_n_equidistant_values_between(current_xpos,
+                                                                                current_layer.start_x,
+                                                                                len(live_wires))):
+                live_wire_x[wire] = x_pos
+
+            next_live_wires = []
+            next_live_wire_y = {}
+            for current_wire in live_wires:
+                canvas.create_line(current_xpos, live_wire_y[current_wire],
+                                   live_wire_x[current_wire], live_wire_y[current_wire],
+                                   fill=self.wirecolors[current_wire], width=3)
+                y_points_to_connect = [ live_wire_y [current_wire] ]
+                for layer_instance in current_layer.instances:
+                    for port, wire in layer_instance.input_ports:
+                        if wire == current_wire:
+                            port_coords = layer_instance.get_port_coords(port)
+                            canvas.create_line(live_wire_x[current_wire], port_coords[1],
+                                               port_coords[0], port_coords[1],
+                                               fill=self.wirecolors[current_wire], width=3)
+                            y_points_to_connect.append(port_coords[1])
+                # Check if we need to propagate this wire forward, else kill it
+                should_propagate_forward = False
+                for target_instance, _ in self.wire_outs[current_wire]:
+                    if target_instance.layer > current_layer.layer_id:
+                        should_propagate_forward = True
+                        break
+                # FIXME Handle propagating backwards as in SR latch
+                if should_propagate_forward:
+                    next_live_wires.append(current_wire)
+                    # Assign a xchannel if not already
+                    if current_wire not in xchannels.keys():
+                        xchannels[current_wire] = xchannel_current
+                        xchannel_current = xchannel_current - xchannel_shift
+                    assigned_xchannel_ypos = xchannels[current_wire]
+                    next_live_wire_y[current_wire] = assigned_xchannel_ypos
+                    # Add another y point to draw a vertical channel line
+                    y_points_to_connect.append(assigned_xchannel_ypos)
+                    canvas.create_line(live_wire_x[current_wire], assigned_xchannel_ypos,
+                                       next_xpos, assigned_xchannel_ypos,
+                                       fill=self.wirecolors[current_wire], width=3)
+                canvas.create_line(live_wire_x[current_wire], min(y_points_to_connect),
+                                   live_wire_x[current_wire], max(y_points_to_connect),
+                                   fill=self.wirecolors[current_wire], width=3)
+
+                # FIXME If we can directly pass through to next level with a straight line then do that
+                # FIXME Correct this if there is already a horizontal line at that point
+                # FIXME Add a bottom channel also and select based on which is closest
+
+            # Add new live wires corresponding to output of current instances
+            for layer_instance in current_layer.instances:
+                for port, wire in layer_instance.output_ports:
+                    next_live_wires.append(wire)
+                    port_coords = layer_instance.get_port_coords(port)
+                    next_live_wire_y[wire] = port_coords[1]
+                    canvas.create_line(port_coords[0], port_coords[1],
+                                       next_xpos, port_coords[1],
+                                       fill=self.wirecolors[wire], width=3)
+
+            # Replace old live wires and their y values with new ones, to be propagated to next layer
+            live_wires = next_live_wires
+            live_wire_y = next_live_wire_y
+            current_xpos = next_xpos
+
+        # Now connect the last layer wires to the output ports
+        # Assign a channel for each wire
+        live_wire_x = {}
+        for wire, x_pos in zip(live_wires, get_n_equidistant_values_between(current_xpos,
+                                                                            self.end_x,
+                                                                            len(live_wires))):
+            live_wire_x[wire] = x_pos
+        for current_wire in live_wires:
+            canvas.create_line(current_xpos, live_wire_y[current_wire],
+                               live_wire_x[current_wire], live_wire_y[current_wire],
+                               fill=self.wirecolors[current_wire], width=3)
+            y_points_to_connect = [ live_wire_y [current_wire] ]
+            for wire in self.output_ports:
+                if wire == current_wire:
+                    port_coords = self.get_port_coords(wire)
+                    canvas.create_line(live_wire_x[current_wire], port_coords[1],
+                                       port_coords[0], port_coords[1],
+                                       fill=self.wirecolors[current_wire], width=3)
+                    y_points_to_connect.append(port_coords[1])
+            # No need to propagate forwards, since this is the last layer
+            # FIXME Handle propagating backwards as in SR latch
+            canvas.create_line(live_wire_x[current_wire], min(y_points_to_connect),
+                               live_wire_x[current_wire], max(y_points_to_connect),
+                               fill=self.wirecolors[current_wire], width=3)
+
+            # FIXME If we can directly pass through to next level with a straight line then do that
+            # FIXME Correct this if there is already a horizontal line at that point
+            # FIXME Add a bottom channel also and select based on which is closest
+
+        # Add new live wires corresponding to output of current instances
+        for layer_instance in current_layer.instances:
+            for port, wire in layer_instance.output_ports:
+                next_live_wires.append(wire)
+                port_coords = layer_instance.get_port_coords(port)
+                next_live_wire_y[wire] = port_coords[1]
+                canvas.create_line(port_coords[0], port_coords[1],
+                                   next_xpos, port_coords[1],
+                                   fill=self.wirecolors[wire], width=3)
+
+        # Replace old live wires and their y values with new ones, to be propagated to next layer
+        live_wires = next_live_wires
+        live_wire_y = next_live_wire_y
+        current_xpos = next_xpos
 
     def get_port_coords(self, required_port):
         if required_port in self.input_ports:
