@@ -70,12 +70,13 @@ class Module():
             while (len(current_instances) != 0):
                 for current_instance, _ in current_instances:
                     if current_instance not in instance_level_value.keys():
-                        instance_level_value[current_instance] = current_level
+                        instance_level_value[current_instance] = 0
+                    instance_level_value[current_instance] = instance_level_value[current_instance] + current_level
                     for _, wire in current_instance.input_ports:
                         prev_instance_tuple  = self.wire_ins[wire]
                         prev_instance, _ = prev_instance_tuple
                         if prev_instance == self: continue
-                        if prev_instance not in visited_instances:
+                        if prev_instance_tuple not in visited_instances:
                             next_instances.append(prev_instance_tuple)
                 current_level = current_level + 1
                 visited_instances = visited_instances.union(set(current_instances))
