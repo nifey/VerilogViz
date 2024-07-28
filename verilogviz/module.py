@@ -6,7 +6,7 @@ import customtkinter
 import random
 
 class Module():
-    def __init__(self, ast_node):
+    def __init__(self, ast_node, width, height):
         self.ast = ast_node
         self.name = ast_node.name
         self.input_ports = []
@@ -18,10 +18,10 @@ class Module():
         self.wire_outs = {} # Maps wire to outputs [(instance, port_name)]
         self.layers = []
 
-        self.canvas_width = 1000
-        self.canvas_height = 1000
-        self.module_width = 800
-        self.module_height = 800
+        self.canvas_width = width
+        self.canvas_height = height
+        self.module_width = 0.9 * self.canvas_width
+        self.module_height = self.canvas_height - 100
         self.start_x = (self.canvas_width/2) - (self.module_width/2)
         self.end_x = (self.canvas_width/2) + (self.module_width/2)
         self.start_y = (self.canvas_height/2) - (self.module_height/2)

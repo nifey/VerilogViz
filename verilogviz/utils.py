@@ -1,15 +1,14 @@
 from pyverilog.vparser.ast import *
 
-def find_root_module_ast(currentAst, rootModuleName):
-    """ Traverses the AST tree and returns the ModuleDef node with the given module name"""
+def get_modules_from_ast(currentAst):
+    """ Returns a list of modules defined in the AST"""
+    modules = []
     if isinstance(currentAst, Source) or isinstance(currentAst, Description):
         for child in currentAst.children():
-            returnVal = find_root_module_ast(child, rootModuleName)
-            if returnVal != None:
-                return returnVal
+            modules.extend(get_modules_from_ast(child))
     elif isinstance(currentAst, ModuleDef):
-        return currentAst
-    return None
+        return [currentAst]
+    return modules
 
 def get_n_equidistant_values_between(start, end, n):
     """ Returns n equidistant values between start and end values

@@ -2,13 +2,10 @@
 
 A tool to visualize circuits written in Verilog. Built on top of [pyverilog](https://github.com/PyHDI/Pyverilog).
 
-## What works now
-- Can render the main module (from the filename) as a rectangle and show the input and output ports
-- Can render some basic primitive gates
-- Arrange the instances and primitive gates in a level order
-- Connect ports with straight lines (which may cross over other gates)
+## Screenshots
 
-![Gates](tests/mux.png)
+![Screenshot1](tests/screenshot1.png)
+![Screenshot2](tests/screenshot2.png)
 
 ## Assumptions
 To make it easier to start with, we have made some assumptions about the verilog code:
@@ -30,7 +27,6 @@ Python packages: pyverilog, customtkinter
       - [X] Half adder
       - [X] Full adder
       - [X] SR Latch
-      - [ ] Something with all verilog supported basic gates
   - Simple sequential circuits
       - [ ] Ripple counter
 - [X] Basic GUI and command line parsing
@@ -38,22 +34,25 @@ Python packages: pyverilog, customtkinter
 - [X] Create internal datastructures of nodes and edges
   - [X] Modules (input pins, output pins, instances)
   - [X] Wires
-- [ ] Layout the nodes in a neat way using place and route
+- [ ] Layout the nodes in a neat way
   - [X] Start with a box for the module
   - [X] Place equidistant input ports on the left side
   - [X] Place equidistant output ports on the right side
   - [X] Start from the output ports and move backwards building a tree, that will give you the layer number
   - [X] Place the wires in between the nodes in a good looking way
   - [X] Render each wire in a different random color to make it easier to differentiate
-  - [ ] Create a basic editor like layout with code on left and diagram generated on right
-  - [ ] Add feature to render any module in the file not just the module with filename
-  - [ ] Handle back edge across layers (SR Latch)
-  - [ ] Overlapping horizontal lines in some cases. Also route the wires in more neater way
+  - [X] Create a basic editor like layout with code on left and diagram generated on right
+  - [X] Add feature to render any module in the file not just the module with filename
   - [ ] Handle custom module instances (naming ports and instances)
+  - [ ] Handle back edge across layers (SR Latch)
+- [ ] Configure setup tools and Publish to PyPi
+- [ ] Optimize the layout for better rendering
+  - [ ] Handle overlapping horizontal lines in some cases. Also route the wires in more neater way
   - [ ] Optimize the order of gates in each level to reduce the number of criss cross wires
   - [ ] Use commutativity of primitive gates to reorder ports for better wire placement
+  - [ ] Dynamically resize the two panes when resized
 
-## Future
+## Future work
 - Add editor capabilities: Turn this into a full blown IDE for Verilog learners
     - Syntax highlighting
     - Checking for basic verilog mistakes
