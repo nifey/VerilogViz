@@ -28,20 +28,20 @@ class Module():
         self.end_y = (self.canvas_height/2) + (self.module_height/2)
 
         # Fill port list and also add them to wires
-        for port in ast_node.portlist.children():
-            assert isinstance(port, Ioport)
-            assert len(port.children()) == 1
-            port = port.children()[0]
-            portname = port.name
-            if isinstance(port, Input):
-                self.input_ports.append(portname)
-                self.wires.append(portname)
-                self.wire_ins[portname] = (self, portname)
-            elif isinstance(port, Output):
-                self.output_ports.append(portname)
-                self.wires.append(portname)
-                self.wire_outs[portname] = [(self, portname)]
-            else: assert False
+        for ioport in ast_node.portlist.children():
+            assert isinstance(ioport, Ioport)
+            for port in ioport.children():
+                if isinstance(port, Input):
+                    portname = port.name
+                    self.input_ports.append(portname)
+                    self.wires.append(portname)
+                    self.wire_ins[portname] = (self, portname)
+                elif isinstance(port, Output):
+                    portname = port.name
+                    self.output_ports.append(portname)
+                    self.wires.append(portname)
+                    self.wire_outs[portname] = [(self, portname)]
+                # else handle regs
 
         # Read wires and instances
         for item in self.ast.items:
@@ -53,7 +53,9 @@ class Module():
                     assert isinstance(instance, Instance)
                     instance_box = InstanceBox(instance)
                     self.instances.append(instance_box)
-            else: assert False
+            else:
+                # Unhandled blocks in module
+                return
 
         # Populate a map for wires with source and destination
         for instance in self.instances:
@@ -157,6 +159,7 @@ class Module():
                                text=port)
             current_port_y = current_port_y + output_port_shift
 
+        if len(self.layers) == 0: return
         for layers in self.layers:
             layers.render(canvas)
 
