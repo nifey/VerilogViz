@@ -46,14 +46,17 @@ class Module():
         # Read wires and instances
         for item in self.ast.items:
             if isinstance(item, Decl):
+                item.show()
                 for child in item.children():
                     self.wires.append(child.name)
-            elif isinstance(item, InstanceList):
+        for item in self.ast.items:
+            if isinstance(item, InstanceList):
                 for instance in item.children():
                     assert isinstance(instance, Instance)
                     instance_box = InstanceBox(instance)
                     self.instances.append(instance_box)
-            else:
+        for item in self.ast.items:
+            if not isinstance(item, Decl) and not isinstance(item, InstanceList):
                 # Unhandled blocks in module
                 return
 
@@ -64,8 +67,6 @@ class Module():
                     self.wire_outs[wire] = []
                 self.wire_outs[wire].append((instance, port))
             for port, wire in instance.output_ports:
-                # FIXME Handle cases when a wire has more than one input
-                assert wire not in self.wire_ins.keys() # Wire should have only on input
                 self.wire_ins[wire] = (instance, port)
 
         # Assign a color for each wire, to be used when rendering the wires
@@ -73,7 +74,7 @@ class Module():
             self.wirecolors[wire] = '#{:02x}{:02x}{:02x}'.format(random.randint(0,255),
                                                            random.randint(0,255),
                                                            random.randint(0,255))
-
+        print (self.wire_ins)
         # Assign a layer number for each instance
         # Start from the output ports and do a breadth first search
         # assigning values to each distinct module, then sort according to the values

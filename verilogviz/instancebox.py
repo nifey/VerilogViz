@@ -1,5 +1,8 @@
 from verilogviz.utils import *
 
+module_input_ports = {}
+module_output_ports = {}
+
 gate_bubble_width = 10
 gate_gap_width = 10
 gate_xor_gap_width = 5
@@ -20,8 +23,17 @@ class InstanceBox:
             for i in range(1, len(self.instance.portlist)):
                 self.input_ports.append((str(i), self.instance.portlist[i].children()[0].name))
         else:
-            # FIXME Have to keep track of input/output ports of custom modules
-            pass
+            module_name = instance.module
+            self.instance.show()
+            for output_port in module_output_ports[module_name]:
+                print (output_port)
+                for port in self.instance.portlist:
+                    port.show()
+                exit()
+
+                self.output_ports.append((output_port, self.instance.portlist[index].children()[0].name))
+            for input_port in module_input_ports[module_name]:
+                self.input_ports.append((input_port, self.instance.portlist[index].children()[0].name))
 
     def is_primitive(self):
         return self.instance.module in ['and', 'nand', 'or', 'nor', 'not', 'buf', 'xor', 'xnor']
@@ -79,13 +91,24 @@ class InstanceBox:
             case 'xnor':    render_xnor_gate(canvas, start_x, start_y, end_x, end_y)
             case 'not':     render_not_gate(canvas, start_x, start_y, end_x, end_y)
             case 'buf':     render_buf_gate(canvas, start_x, start_y, end_x, end_y)
-            case _:         render_module(canvas, start_x, start_y, end_x, end_y)
+            case _:         render_module(canvas, self.instance, start_x, start_y, end_x, end_y)
 
 
-def render_module(canvas, start_x, start_y, end_x, end_y):
+def render_module(canvas, instance, start_x, start_y, end_x, end_y):
     center_x = (start_x + end_x)/2
+    center_y = (start_y + end_y)/2
+    width = end_x - start_x
+    height = end_y - start_y
     canvas.create_rectangle(center_x - width/2, center_y - height/2,
                             center_x + width/2, center_y + height/2)
+    # Render labels for ports
+    module_name = instance.module
+    for output_port in module_output_ports[module_name]:
+        self.output_ports.append((output_port, self.instance.portlist[index].children()[0].name))
+        index = index + 1
+    for input_port in module_input_ports[module_name]:
+        self.input_ports.append((input_port, self.instance.portlist[index].children()[0].name))
+        index = index + 1
 
 def render_and_gate(canvas, start_x, start_y, end_x, end_y):
     mid_x = (start_x + end_x)/2

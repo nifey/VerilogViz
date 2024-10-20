@@ -3,6 +3,7 @@ import sys
 from pyverilog.vparser.parser import parse
 import customtkinter
 from verilogviz.module import *
+from verilogviz.instancebox import module_input_ports, module_output_ports
 
 if (len(sys.argv) < 2):
     print("No verilog input files provided")
@@ -59,6 +60,7 @@ textbox.pack(fill='both')
 combobox = customtkinter.CTkComboBox(menu_bar, values=[], corner_radius=0)
 combobox.grid(row=0, column=2)
 
+# Global module information
 modules_in_file = []
 moduleDefs = []
 
@@ -72,8 +74,20 @@ def render_file():
         customtkinter.CTkLabel(dialog, text=str(e)).pack()
         dialog.mainloop()
     global moduleDefs
-    moduleDefs = get_modules_from_ast(ast)
+    global module_input_ports
     global modules_in_file
+    moduleDefs = get_modules_from_ast(ast)
+    for module in moduleDefs:
+        module_input_ports[module.name] = []
+        module_output_ports[module.name] = []
+        assert isinstance(module, ModuleDef)
+        for ioport in module.portlist.children():
+            for port in ioport.children():
+                if isinstance(port, Input):
+                    module_input_ports[module.name].append(port.name)
+                elif isinstance(port, Output):
+                    module_output_ports[module.name].append(port.name)
+
     modules_in_file = list(map(lambda x: x.name, moduleDefs))
     selected_module_name = combobox.get()
     combobox.configure(values = modules_in_file)
